@@ -79,24 +79,22 @@ var requestHandler = function(request, response) {
     var body = '';
     //Still getting data from client
     request.on('data', function(chunk) {
+      console.log('CHUNK: ', chunk);
       body += chunk.toString();
-    });
-    //Finished getting data
-    request.on('end', function() {
-      console.log(body);
-      fs.appendFile('messages.txt', body + '\r\n', 'utf8', function(err) {
+    }).on('end', function() {
+      fs.appendFileSync('messages.txt', body + '\r\n', 'utf8', function(err) {
         if (err) {
           console.log(err);
           throw err;
         }
         console.log('Data appended successfully');
-        response.write(JSON.stringify(data));
-        response.end();
       });
+      response.end(JSON.stringify(data));
     });
 
   //GET
   } else {
+    console.log('[' + statusCode + ']: ' + request.method + ' to ' + request.url);
     var stream = lr.createInterface({
       input: fs.createReadStream('messages.txt')
     });
@@ -106,15 +104,20 @@ var requestHandler = function(request, response) {
       console.log('Line from file:', line, data.results);
     }).on('close', function() {
       console.log('Done');
-      response.write(JSON.stringify(data));
-      response.end();
+      data.results = data.results.reverse();
+      response.end(JSON.stringify(data));
+      console.log(response);
     });
 
-    // data.results = data.results.reverse();
-    //console.log('Results: ', data.results);
+    // fs.readFileSync('messages.txt').toString().split('\n').forEach(function (line) { 
+    //   console.log(line);
+    //   data.results.push(JSON.parse(line));
+    // });
+    // response.end(JSON.stringify(data));
   }
 };
 
 
-module.exports = requestHandler;
+//module.exports = requestHandler;
+exports.requestHandler = requestHandler;
 

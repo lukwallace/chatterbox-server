@@ -25,7 +25,7 @@ var ip = '127.0.0.1';
 // After creating the server, we will tell it to listen on the given port and IP. */
 fs.writeFileSync('messages.txt', '');
 
-var server = http.createServer(handleRequest);
+var server = http.createServer(handleRequest.requestHandler);
 console.log('Listening on http://' + ip + ':' + port);
 server.listen(port, ip);
 
