@@ -70,8 +70,8 @@ describe('Node Server Request Listener Function', function() {
     expect(res._responseCode).to.equal(201);
 
     // Testing for a newline isn't a valid test
-    // TODO: Replace with with a valid test
-    // expect(res._data).to.equal(JSON.stringify('\n'));
+    // TODO: REPLACED
+    expect(res._headers['Content-Type']).to.equal('application/json');
     expect(res._ended).to.equal(true);
   });
 
@@ -116,4 +116,18 @@ describe('Node Server Request Listener Function', function() {
       });
   });
 
+
+  it('Should 405 if method is not GET or POST', function() {
+    var req = new stubs.request('/classes/messages', 'PUT');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    // Wait for response to return and then check status code
+    waitForThen(
+      function() { return res._ended; },
+      function() {
+        expect(res._responseCode).to.equal(405);
+      });
+  });
 });

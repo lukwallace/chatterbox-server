@@ -30,16 +30,24 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+var counter = 1;
+var messages = [];
+
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
 
   // The outgoing status.
   var statusCode;
-  if (request.url.includes('/classes/messages')) {
-    statusCode = request.method === 'POST' ? 201 : 200;
-  } else {
+  if ( !request.url.includes('/classes/messages') ) {
     statusCode = 404;
+  } else if ( request.method === 'POST' ) {
+    statusCode = 201;
+  } else if ( request.method === 'GET' ) {
+    statusCode = 200;
+  } else {
+    statusCode = 405;
   }
+
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -61,24 +69,34 @@ var requestHandler = function(request, response) {
     request.on('data', function(chunk) {
       body += chunk.toString();
     });
+    statusCode = request.method === 'PUT' ? 405 : 404;
 
     request.on('end', function() {
-      fs.appendFileSync('messages.txt', body + '\r\n', 'utf8', function(err) {
-        if (err) {
-          console.error(err);
-          throw err;
-        }
-      });
+      var obj = JSON.parse(body);
+      counter++;
+      obj.objectId = counter;
+      messages.push(obj);
+
+      // fs.appendFileSync('messages.txt', obj + '\r\n', 'utf8', function(err) {
+      //   if (err) {
+      //     console.error(err);
+      //     throw err;
+      //   }
+      // });
       response.end(JSON.stringify(data));
     });
 
   //GET
   } else {
-    fs.readFileSync('messages.txt').toString().split('\n').forEach(function (line) {
-      if (line) {
-        data.results.push(JSON.parse(line));
-      }
+    messages.forEach(function (jsonObj) {
+      data.results.push(jsonObj);
     });
+    // fs.readFileSync('messages.txt').toString().split('\n').forEach(function (line) {
+    //   if (line) {
+    //     data.results.push(JSON.parse(line));
+    //   }
+    // });
+
     response.end(JSON.stringify(data));
   }
 };
