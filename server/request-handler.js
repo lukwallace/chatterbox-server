@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -45,7 +47,12 @@ var requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   // The outgoing status.
-  var statusCode = 200;
+  var statusCode;
+  if (request.url.includes('/classes/messages')) {
+    statusCode = request.method === 'POST' ? 201 : 200;
+  } else {
+    statusCode = 404;
+  }
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -54,20 +61,46 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
-
+  headers['Content-Type'] = 'application/json';
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
 
-  // Make sure to always call response.end() - Node may not send
-  // anything back to the client until you do. The string you pass to
-  // response.end() will be the body of the response - i.e. what shows
-  // up in the browser.
-  //
-  // Calling .end "flushes" the response's internal buffer, forcing
-  // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  var data = {
+    method: request.method,
+    url: request.url,
+    results: []
+  };
+
+  //POST
+  if (request.method === 'POST') {
+    console.log('[' + statusCode + ']: ' + request.method + ' to ' + request.url);
+    var body = '';
+    //Still getting data from client
+    request.on('data', function(chunk) {
+      body += chunk.toString();
+    });
+    //Finished getting data
+    request.on('end', function() {
+      console.log(body);
+      fs.appendFile('messages.txt', body + '\n', 'utf8', function(err) {
+        if (err) {
+          console.log(err);
+          throw err;
+        }
+        console.log('Data appended successfully');
+        response.write(JSON.stringify(data));
+        response.end();
+      });
+    });
+
+  //GET
+  } else {
+
+
+    response.write(JSON.stringify(data));
+    response.end();
+  }
 };
 
 
