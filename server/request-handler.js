@@ -1,6 +1,7 @@
 var fs = require('fs');
 var lr = require('readline');
-
+// var nodeStatic = require('node-static');
+var port = 3000;
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -32,9 +33,17 @@ var defaultCorsHeaders = {
 
 var counter = 1;
 var messages = [];
+// var client = new nodeStatic.Server('../client/index.html');
+fs.appendFileSync('messages.txt', '');
+fs.readFileSync('messages.txt').toString().split('\n').forEach(function (line) {
+  if (line) {
+    messages.push(JSON.parse(line));
+  }
+});
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
+
 
   // The outgoing status.
   var statusCode;
@@ -42,12 +51,11 @@ var requestHandler = function(request, response) {
     statusCode = 404;
   } else if ( request.method === 'POST' ) {
     statusCode = 201;
-  } else if ( request.method === 'GET' ) {
+  } else if ( request.method === 'GET' || request.method === 'OPTIONS' ) {
     statusCode = 200;
   } else {
     statusCode = 405;
   }
-
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -69,20 +77,22 @@ var requestHandler = function(request, response) {
     request.on('data', function(chunk) {
       body += chunk.toString();
     });
-    statusCode = request.method === 'PUT' ? 405 : 404;
+    // statusCode = request.method === 'PUT' ? 405 : 404;
 
     request.on('end', function() {
+      // client.serveFile(request, response);
       var obj = JSON.parse(body);
       counter++;
       obj.objectId = counter;
       messages.push(obj);
 
-      // fs.appendFileSync('messages.txt', obj + '\r\n', 'utf8', function(err) {
-      //   if (err) {
-      //     console.error(err);
-      //     throw err;
-      //   }
-      // });
+      fs.appendFileSync('messages.txt', JSON.stringify(obj) + '\r\n', 'utf8', function(err) {
+        if (err) {
+          console.error(err);
+          throw err;
+        }
+      });
+
       response.end(JSON.stringify(data));
     });
 
@@ -91,12 +101,10 @@ var requestHandler = function(request, response) {
     messages.forEach(function (jsonObj) {
       data.results.push(jsonObj);
     });
-    // fs.readFileSync('messages.txt').toString().split('\n').forEach(function (line) {
-    //   if (line) {
-    //     data.results.push(JSON.parse(line));
-    //   }
-    // });
 
+    // request.on('end', function() {
+    //   client.serve(request, response);
+    // });
     response.end(JSON.stringify(data));
   }
 };

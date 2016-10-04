@@ -31,6 +31,7 @@
     ]
   },
   "dependencies": {
+    "node-static": "^0.7.9",
     "underscore": "^1.8.3"
   }
 }
