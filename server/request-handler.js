@@ -32,20 +32,6 @@ var defaultCorsHeaders = {
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
-  //
-  // They include information about both the incoming request, such as
-  // headers and URL, and about the outgoing response, such as its status
-  // and content.
-  //
-  // Documentation for both request and response can be found in the HTTP section at
-  // http://nodejs.org/documentation/api/
-
-  // Do some basic logging.
-  //
-  // Adding more logging to your server can be an easy way to get passive
-  // debugging help, but you should always be careful about leaving stray
-  // console.logs in your code.
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   // The outgoing status.
   var statusCode;
@@ -58,13 +44,8 @@ var requestHandler = function(request, response) {
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
 
-  // Tell the client we are sending them plain text.
-  //
-  // You will need to change this if you are sending something
-  // other than plain text, like JSON or HTML.
   headers['Content-Type'] = 'application/json';
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
+
   response.writeHead(statusCode, headers);
 
   var data = {
@@ -75,45 +56,30 @@ var requestHandler = function(request, response) {
 
   //POST
   if (request.method === 'POST') {
-    console.log('[' + statusCode + ']: ' + request.method + ' to ' + request.url);
     var body = '';
     //Still getting data from client
     request.on('data', function(chunk) {
-      console.log('CHUNK: ', chunk);
       body += chunk.toString();
-    }).on('end', function() {
+    });
+
+    request.on('end', function() {
       fs.appendFileSync('messages.txt', body + '\r\n', 'utf8', function(err) {
         if (err) {
-          console.log(err);
+          console.error(err);
           throw err;
         }
-        console.log('Data appended successfully');
       });
       response.end(JSON.stringify(data));
     });
 
   //GET
   } else {
-    console.log('[' + statusCode + ']: ' + request.method + ' to ' + request.url);
-    var stream = lr.createInterface({
-      input: fs.createReadStream('messages.txt')
+    fs.readFileSync('messages.txt').toString().split('\n').forEach(function (line) {
+      if (line) {
+        data.results.push(JSON.parse(line));
+      }
     });
-
-    stream.on('line', function (line) {
-      data.results.push(JSON.parse(line));
-      console.log('Line from file:', line, data.results);
-    }).on('close', function() {
-      console.log('Done');
-      data.results = data.results.reverse();
-      response.end(JSON.stringify(data));
-      console.log(response);
-    });
-
-    // fs.readFileSync('messages.txt').toString().split('\n').forEach(function (line) { 
-    //   console.log(line);
-    //   data.results.push(JSON.parse(line));
-    // });
-    // response.end(JSON.stringify(data));
+    response.end(JSON.stringify(data));
   }
 };
 
