@@ -1,4 +1,5 @@
 var fs = require('fs');
+var lr = require('readline');
 
 /*************************************************************
 
@@ -83,7 +84,7 @@ var requestHandler = function(request, response) {
     //Finished getting data
     request.on('end', function() {
       console.log(body);
-      fs.appendFile('messages.txt', body + '\n', 'utf8', function(err) {
+      fs.appendFile('messages.txt', body + '\r\n', 'utf8', function(err) {
         if (err) {
           console.log(err);
           throw err;
@@ -96,10 +97,21 @@ var requestHandler = function(request, response) {
 
   //GET
   } else {
+    var stream = lr.createInterface({
+      input: fs.createReadStream('messages.txt')
+    });
 
+    stream.on('line', function (line) {
+      data.results.push(JSON.parse(line));
+      console.log('Line from file:', line, data.results);
+    }).on('close', function() {
+      console.log('Done');
+      response.write(JSON.stringify(data));
+      response.end();
+    });
 
-    response.write(JSON.stringify(data));
-    response.end();
+    // data.results = data.results.reverse();
+    //console.log('Results: ', data.results);
   }
 };
 
