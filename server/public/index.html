@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <title>chatterbox</title>
     <link rel="stylesheet" href="styles/styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+
 
     <!-- dependencies -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
@@ -23,19 +25,22 @@
   </head>
   <body>
     <div id="main">
-      <h1>chatterbox</h1>
+      <h1>ChatBox</h1>
       <!-- Your HTML goes here! -->
 
       <div class="spinner"><img src="images/spiffygif_46x46.gif"></div>
+      
+      <form action="#" id="send" method="post">
+        <input type="text" name="message" id="message"/>
+        <input type="submit" name="submit" class="submit"/>
+      </form>    </div>
+
       <div id="rooms">
         Room:
         <select id="roomSelect">
         </select>
       </div>
-      <form action="#" id="send" method="post">
-        <input type="text" name="message" id="message"/>
-        <input type="submit" name="submit" class="submit"/>
-      </form>    </div>
+      <br>
     <div id="chats"></div>
 
     <script>
