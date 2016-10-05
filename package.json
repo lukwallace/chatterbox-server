@@ -1,5 +1,4 @@
 {
-  "cacheDirectories": ["node_modules", "bower_components", "public/build" ],
   "name": "chatterbox-server",
   "version": "1.1.0",
   "description": "Implement a chat server",
@@ -10,7 +9,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "start": "node server/basic-server.js",
+    "postinstall": "bower install",
     "start:es6": "babel-node server/basic-server.js",
     "test": "mocha server/spec",
     "test:es6": "mocha --compilers js:babel-register server/spec",
