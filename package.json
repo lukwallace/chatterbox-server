@@ -38,6 +38,6 @@
     "jquery": "^3.1.1",
     "node-static": "^0.7.9",
     "underscore": "^1.8.3",
-    "chatterbox-server: lukwallace/chatterbox-server"
+    "chatterbox-server": "lukwallace/chatterbox-server"
   }
 }
