@@ -1,6 +1,10 @@
 /* Import node's http module: */
 var http = require('http');
 var fs = require('fs');
+var bodyParser = require('body-parser');
+var express = require('express');
+var app = express();
+var path = require('path');
 
 var handleRequest = require('./request-handler');
 
@@ -11,12 +15,7 @@ var handleRequest = require('./request-handler');
 // ports are 8080 and 1337.
 var port = 3000;
 
-// For now, since you're running this server on your local machine,
-// we'll have it listen on the IP address 127.0.0.1, which is a
-// special address that always refers to localhost.
 var ip = '127.0.0.1';
-
-
 
 // We use node's http module to create a server.
 //
@@ -24,22 +23,46 @@ var ip = '127.0.0.1';
 // incoming requests.
 //
 // After creating the server, we will tell it to listen on the given port and IP. */
-// fs.writeFileSync('messages.txt', '');
 
-var server = http.createServer(handleRequest.requestHandler);
-console.log('Listening on http://' + ip + ':' + port);
-server.listen(port, ip);
+//Node server implementation
+// var server = http.createServer(handleRequest.requestHandler);
+// console.log('Listening on http://' + ip + ':' + port);
+// server.listen(port, ip);
 
-// To start this server, run:
-//
-//   node basic-server.js
-//
-// on the command line.
-//
-// To connect to the server, load http://127.0.0.1:3000 in your web
-// browser.
-//
-// server.listen() will continue running as long as there is the
-// possibility of serving more requests. To stop your server, hit
-// Ctrl-C on the command line.
+//Store all messages
+var messages = [];
 
+//Keep messages in chronological order
+var counter = 0;
+
+//Express Static File
+app.use(express.static(path.join(__dirname, 'public')));
+
+//Body-Parser Module
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+//GET
+app.get('/classes/messages', function(req, res) {
+  var data = {results: []};
+  messages.forEach(function (jsonObj) {
+    data.results.push(jsonObj);
+  });
+  data.results = data.results.reverse();
+  res.send(data);
+});
+
+//POST
+app.post('/classes/messages', function (req, res) {
+  counter++;
+  var datum = {
+    objectId: counter,
+    username: req.body.username,
+    text: req.body.text,
+    roomname: req.body.roomname
+  };
+  messages.push(datum);
+  res.status(201).send('I got sometihng');
+});
+
+app.listen(3000);

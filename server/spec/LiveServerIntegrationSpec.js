@@ -82,7 +82,7 @@ describe('server', function() {
     };
 
     request(requestParams, function(error, response, body) {
-      expect(response.statusCode).to.equal(405);
+      expect(response.statusCode).to.equal(404);
       done();
     });
   });

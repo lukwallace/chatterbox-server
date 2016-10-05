@@ -1,20 +1,6 @@
 var fs = require('fs');
 var lr = require('readline');
-// var nodeStatic = require('node-static');
-var port = 3000;
-/*************************************************************
 
-You should implement your request handler function in this file.
-
-requestHandler is already getting passed to http.createServer()
-in basic-server.js, but it won't work as is.
-
-You'll have to figure out a way to export this function from
-this file and include it in basic-server.js so that it actually works.
-
-*Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
-
-**************************************************************/
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
 // are on different domains, for instance, your chat client.
@@ -33,7 +19,7 @@ var defaultCorsHeaders = {
 
 var counter = 1;
 var messages = [];
-// var client = new nodeStatic.Server('../client/index.html');
+
 fs.appendFileSync('messages.txt', '');
 fs.readFileSync('messages.txt').toString().split('\n').forEach(function (line) {
   if (line) {
@@ -42,7 +28,7 @@ fs.readFileSync('messages.txt').toString().split('\n').forEach(function (line) {
 });
 
 var requestHandler = function(request, response) {
-  // Request and Response come from node's http module.
+// Request and Response come from node's http module.
 
 
   // The outgoing status.
@@ -54,7 +40,7 @@ var requestHandler = function(request, response) {
   } else if ( request.method === 'GET' || request.method === 'OPTIONS' ) {
     statusCode = 200;
   } else {
-    statusCode = 405;
+    statusCode = 404;
   }
 
   // See the note below about CORS headers.
@@ -73,14 +59,11 @@ var requestHandler = function(request, response) {
   //POST
   if (request.method === 'POST') {
     var body = '';
-    //Still getting data from client
     request.on('data', function(chunk) {
       body += chunk.toString();
     });
-    // statusCode = request.method === 'PUT' ? 405 : 404;
 
     request.on('end', function() {
-      // client.serveFile(request, response);
       var obj = JSON.parse(body);
       counter++;
       obj.objectId = counter;
@@ -98,18 +81,13 @@ var requestHandler = function(request, response) {
 
   //GET
   } else {
-    messages.forEach(function (jsonObj) {
+    messages.reverse().forEach(function (jsonObj) {
       data.results.push(jsonObj);
     });
 
-    // request.on('end', function() {
-    //   client.serve(request, response);
-    // });
     response.end(JSON.stringify(data));
   }
 };
 
-
-//module.exports = requestHandler;
 exports.requestHandler = requestHandler;
 
